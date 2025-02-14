@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Queen 👑</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-shape-heart@2.9.3/tsparticles.shape.heart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .heart-pulse {
+            animation: pulse 1.5s infinite;
+        }
+        .card-pull {
+            transition: all 0.5s ease;
+        }
+        .card-pull:hover {
+            transform: rotate(-5deg) translateY(-10px);
+        }
+        .question-container {
+            margin: 20px auto;
+            width: 300px;
+        }
+        .button {
+            background-color: #4dadff;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+        .error {
+            color: red;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body class="bg-gradient-to-r from-rose-100 to-pink-200 min-h-screen">
+    <!-- Particles Background -->
+     <!-- tsParticles container -->
+    <div id="tsparticles" class="fixed inset-0 z-0"></div>
+
+    <!-- <div id="particles" class="fixed inset-0 z-0"></div> -->
+
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full space-y-6 transform transition-all">
+            <h1 class="text-3xl font-bold text-rose-600 text-center mb-6">Identity Verification 🔐</h1>
+            <h2 class="text-center pb-2 border-black border-b font-bold mb-4">
+                Only proceed if you are Anna "Wifey" Famadico
+              </h2>
+            <div id="questionnaire">
+                <div id="question-container" class="question-container text-center font-bold"></div>
+                
+                <div id="answer-container" class="flex grid grid-cols-2 justify-center"></div>
+                <div id="error-message" class="error font-bold"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intermediate Page -->
+    <div id="intermediate-page" class="hidden fixed inset-0 z-20 bg-white flex items-center justify-center p-4">
+        <div class="text-center space-y-6">
+            <div class="heart-pulse text-rose-600 text-6xl">❤️</div>
+            <h2 class="text-2xl font-bold text-gray-800">Phew, test complete!</h2>
+            <p class="text-gray-600">Since I know now you're my girlfriend...</p>
+            <button onclick="showFinalProposal()" 
+                    class="bg-rose-600 text-white px-8 py-3 rounded-full hover:bg-rose-700 transition-transform transform hover:scale-105">
+                What is it?
+            </button>
+        </div>
+    </div>
+
+    <!-- Final Proposal -->
+    <div id="final-proposal" class="hidden fixed inset-0 z-30 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center space-y-6 card-pull">
+            <div class="space-y-4">
+                <div class="text-6xl animate-bounce">💌</div>
+                <h2 class="text-3xl font-bold text-gray-800">Will you be my Valentine?</h2>
+                <p class="text-gray-600">Not just this year, but every year after?</p>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <button onclick="celebrate()" 
+                        class="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-transform transform hover:scale-105">
+                    Yes! Always! 💖
+                </button>
+                <button class="bg-gray-200 text-gray-700 px-6 py-2 rounded-full transform transition hover:scale-105" 
+                        disabled style="opacity: 0.5;">
+                    Maybe...?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What was the first movie we saw together?",
+                options: ["Inception", "The Joker", "The Dark Knight", "Spider-Man"],
+                answer: "The Joker"
+            },
+            {
+                question: "What was the last movie we saw together?",
+                options: ["Pirates of the Caribbean", "The Matrix", "Harry Potter", "The Avengers"],
+                answer: "Harry Potter"
+            },
+            {
+                question: "What is our favorite anime?",
+                options: ["Demon Slayer", "Naruto", "My Hero Academia", "One Piece"],
+                answer: "Demon Slayer"
+            },
+            {
+                question: "Where was our first international travel?",
+                options: ["Paris", "Rome", "Barcelona", "London"],
+                answer: "London"
+            },
+            {
+                question: "Where was the last place we travelled to together?",
+                options: ["Tokyo","Canada", "Australia", "Iceland"],
+                answer: "Canada"
+            },
+            {
+                question: "What's our couple's sport?",
+                options: ["Mini Golf", "Cycling", "Bowling", "Tennis"],
+                answer: "Bowling"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+
+        function loadQuestion() {
+            const answerContainer = document.getElementById('answer-container');
+            const questionContainer = document.getElementById('question-container');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = '';
+
+            if (currentQuestionIndex < questions.length) {
+                answerContainer.innerHTML = '';
+                const currentQuestion = questions[currentQuestionIndex];
+                questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.className = 'button font-bold';
+                    button.textContent = option;
+                    button.onclick = () => checkAnswer(option);
+                    answerContainer.appendChild(button);
+                });
+            } else {
+                window.location.href = 'success.html';
+            }
+        }
+
+        // Function to generate a random legible color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function checkAnswer(selectedOption) {
+            const errorMessage = document.getElementById('error-message');
+            if (selectedOption === questions[currentQuestionIndex].answer) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                const randomColor = getRandomColor(); // Generate a random color
+                errorMessage.textContent = "WRONG ANSWER\r\n(p.s. I know you have a bad memory but come on 🥲)";
+                errorMessage.style.whiteSpace = 'pre-line';
+                errorMessage.style.color = randomColor; // Apply the random color
+                errorMessage.style += "text-shadow: "+ randomColor + " 1px 0 1px;"
+                errorMessage.style += "white-space: pre;"
+            }
+        }
+
+        loadQuestion();
+    </script>
+
+    <script>
+        (async () => {
+            await loadHeartShape(tsParticles);
+
+            await tsParticles.load("tsparticles", {
+                background: {
+                color: {
+                    value: "#301A47"
+                }
+                },
+                particles: {
+                color: {
+                    value: [
+                    "#FFAEBC",
+                    "#A0E7E5",
+                    "#B4F8C8",
+                    "#FBE7C6",
+                    "#FFC9AE",
+                    "#FFAEE5",
+                    "#A0C6E7",
+                    "#A0E7C2",
+                    "#B4F8EA",
+                    "#C2F8B4",
+                    "#F4FBC6",
+                    "#FBCDC6"
+                    ]
+                },
+                move: {
+                    angle: {
+                    offset: 0,
+                    value: 15
+                    },
+                    direction: "bottom",
+                    enable: true,
+                    outModes: {
+                    default: "out"
+                    },
+                    speed: 3
+                },
+                number: {
+                    value: 300
+                },
+                opacity: {
+                    value: 1
+                },
+                shape: {
+                    type: "heart"
+                },
+                size: {
+                    value: 16
+                },
+                roll: {
+                    darken: {
+                    enable: true,
+                    value: 30
+                    },
+                    enlighten: {
+                    enable: true,
+                    value: 30
+                    },
+                    enable: true,
+                    mode: "horizontal",
+                    speed: {
+                    min: 5,
+                    max: 15
+                    }
+                },
+                zIndex: {
+                    value: {
+                    min: 0,
+                    max: 100
+                    },
+                    opacityRate: 0,
+                    velocityRate: 2
+                }
+                }
+            });
+            })();
+
+    </script>
+</body>
+</html>
